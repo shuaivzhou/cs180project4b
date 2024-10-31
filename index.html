@@ -1,0 +1,708 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>CS180 Project 4: Stitching Photo Mosaics</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 3px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+    margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-block;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1.25em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.highlight-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.highlight-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.highlight-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.highlight-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.highlight-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.highlight-default_background {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.highlight-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.highlight-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.highlight-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.highlight-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.highlight-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.highlight-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.highlight-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.highlight-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.block-color-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.block-color-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.block-color-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.block-color-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.block-color-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.block-color-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.block-color-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.block-color-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.block-color-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.block-color-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.block-color-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.select-value-color-uiBlue { background-color: rgba(35, 131, 226, .07); }
+.select-value-color-pink { background-color: rgba(245, 224, 233, 1); }
+.select-value-color-purple { background-color: rgba(232, 222, 238, 1); }
+.select-value-color-green { background-color: rgba(219, 237, 219, 1); }
+.select-value-color-gray { background-color: rgba(227, 226, 224, 1); }
+.select-value-color-transparentGray { background-color: rgba(227, 226, 224, 0); }
+.select-value-color-translucentGray { background-color: rgba(0, 0, 0, 0.06); }
+.select-value-color-orange { background-color: rgba(250, 222, 201, 1); }
+.select-value-color-brown { background-color: rgba(238, 224, 218, 1); }
+.select-value-color-red { background-color: rgba(255, 226, 221, 1); }
+.select-value-color-yellow { background-color: rgba(253, 236, 200, 1); }
+.select-value-color-blue { background-color: rgba(211, 229, 239, 1); }
+.select-value-color-pageGlass { background-color: undefined; }
+.select-value-color-washGlass { background-color: undefined; }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="12f412c2-dbbd-8025-b381-d4eca3a7468a" class="page sans"><header><img class="page-cover-image" src="set1Mosaic%202.png" style="object-position:center 44.36%"/><h1 class="page-title">CS180 Project 4: Stitching Photo Mosaics</h1><p class="page-description"></p></header><div class="page-body"><p id="228413cf-ff94-4cfb-8ecc-03037a64737f" class="">Name: Shuai Victor Zhou</p><p id="55502f84-993f-442b-97e7-5c9887df9d6e" class="">SID: 3035912996</p><hr id="12f412c2-dbbd-8047-898f-c04e1421855b"/><h1 id="12f412c2-dbbd-8002-8e74-d656246dd1c8" class="">Part A: Image Warping and Mosaicing</h1><hr id="a9f60c74-77bd-4d65-bffa-1cd060350939"/><h2 id="b466f2a4-4d49-4867-be24-1eb46b966917" class="">Overview</h2><p id="d6f1e1d0-73c6-4875-b693-7c9eb05c9562" class="">In this part of the project, we identify homographies that map from a scene to another similar scene. By finding the correct map that correlates to our homography, we are able to warp images, allowing for the rectification of images as well as the creation of mosaics.</p><hr id="123a7754-0cd2-4fa2-a295-1bb91c8d7776"/><h2 id="1803575d-2fa7-4cdf-aa69-0350ae5965db" class="">Shoot the Pictures</h2><p id="c98e0f2c-6b4b-44f1-bbfe-5cf119af3db5" class="">By fixing the center of projection (COP), I took the following photos to create mosaics with.</p><div id="0da0e354-377c-43bb-a0d3-17828c685b57" class="column-list"><div id="c3cccc33-da31-4f40-a409-9f2ff949f422" style="width:50%" class="column"><figure id="60c3b553-1d76-4972-a90a-31f2bbe1baee" class="image"><a href="set1_1.jpg"><img style="width:330.984375px" src="set1_1.jpg"/></a></figure></div><div id="f122d3ca-cf87-46dd-b666-d584384e9195" style="width:50%" class="column"><figure id="41ea304b-7709-410c-a8ec-1701e6017619" class="image"><a href="set1_2.jpg"><img style="width:330.984375px" src="set1_2.jpg"/></a></figure></div></div><div id="71e7f75b-f064-42d6-9f99-f1f4e0ea130f" class="column-list"><div id="062ea04c-f427-40ee-89b0-cdf6579a5174" style="width:50%" class="column"><figure id="e7e4ef46-8c1f-4178-b29d-ee70b035d532" class="image"><a href="set2_1.jpg"><img style="width:331px" src="set2_1.jpg"/></a></figure></div><div id="455384e3-eeaf-4d84-9d37-0a0cc17b9845" style="width:50%" class="column"><figure id="7da86f0c-02bd-4d8e-bfc0-dce6726b0a9f" class="image"><a href="set2_2.jpg"><img style="width:330.984375px" src="set2_2.jpg"/></a></figure></div></div><div id="18ab8ad9-83ee-4c4d-ac4e-4a82db3feb19" class="column-list"><div id="64a79c68-9118-439a-8b05-8a86d89aeffe" style="width:50%" class="column"><figure id="2f9f7f98-d3bb-4ae4-ab55-78e630adeadd" class="image"><a href="set3_1.jpg"><img style="width:331px" src="set3_1.jpg"/></a></figure></div><div id="ae2e812e-8299-451c-802a-475803e7d219" style="width:50%" class="column"><figure id="0f26825e-918d-4eb2-ad40-370c53a0402f" class="image"><a href="set3_2.jpg"><img style="width:330.984375px" src="set3_2.jpg"/></a></figure></div></div><hr id="44717d57-47b4-4736-b2db-b6d690f24e6f"/><h2 id="83609336-7a27-41d8-916f-0d39432d7deb" class="">Recover Homographies</h2><p id="229068ab-c203-4e50-9979-ca9a66827dc6" class="">The homography between two images can be represented by a 3x3 homography matrix, <em>H</em>. This matrix is the mapping such that</p><figure id="6d7c84fe-d8d2-4e9d-9067-afd59326d0f8" class="equation"><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css')</style><div class="equation-container"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>H</mi><mi>p</mi><mo>=</mo><msup><mi>p</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup></mrow><annotation encoding="application/x-tex">Hp = p&#x27;</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8778em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.08125em;">H</span><span class="mord mathnormal">p</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.9963em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal">p</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8019em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span></span></span></span></span></div></figure><p id="1e9d45cc-2bf0-4b6d-8902-1f42c3c4ec5b" class="">for corresponding points <em>p</em> and <em>p’</em> on the first and second images, respectively. <em>H</em> takes on the form</p><figure id="2932e229-d998-4414-bf65-69251323afda" class="equation"><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css')</style><div class="equation-container"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>H</mi><mo>=</mo><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>a</mi></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>b</mi></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>c</mi></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>d</mi></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>e</mi></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>f</mi></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>g</mi></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>h</mi></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><mi mathvariant="normal">.</mi></mrow><annotation encoding="application/x-tex">H = \begin{bmatrix}
+a &amp; b &amp; c \\
+d &amp; e &amp; f \\
+g &amp; h &amp; 1 \\
+\end{bmatrix}.</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.08125em;">H</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:3.6em;vertical-align:-1.55em;"></span><span class="minner"><span class="mopen"><span class="delimsizing mult"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.05em;"><span style="top:-4.05em;"><span class="pstrut" style="height:5.6em;"></span><span style="width:0.667em;height:3.600em;"><svg xmlns="http://www.w3.org/2000/svg" width='0.667em' height='3.600em' viewBox='0 0 667 3600'><path d='M403 1759 V84 H666 V0 H319 V1759 v0 v1759 h347 v-84
+H403z M403 1759 V0 H319 V1759 v0 v1759 h84z'/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.55em;"><span></span></span></span></span></span></span><span class="mord"><span class="mtable"><span class="col-align-c"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.05em;"><span style="top:-4.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">a</span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">d</span></span></span><span style="top:-1.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">g</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.55em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-c"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.05em;"><span style="top:-4.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">b</span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">e</span></span></span><span style="top:-1.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">h</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.55em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-c"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.05em;"><span style="top:-4.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">c</span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.10764em;">f</span></span></span><span style="top:-1.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.55em;"><span></span></span></span></span></span></span></span><span class="mclose"><span class="delimsizing mult"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.05em;"><span style="top:-4.05em;"><span class="pstrut" style="height:5.6em;"></span><span style="width:0.667em;height:3.600em;"><svg xmlns="http://www.w3.org/2000/svg" width='0.667em' height='3.600em' viewBox='0 0 667 3600'><path d='M347 1759 V0 H0 V84 H263 V1759 v0 v1759 H0 v84 H347z
+M347 1759 V0 H263 V1759 v0 v1759 h84z'/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.55em;"><span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">.</span></span></span></span></span></div></figure><p id="ce91ce6c-a904-4113-91f5-061747e86955" class="">To find these values, we’re looking to solve a system of equations that maps to</p><figure id="4fe4da95-ce0a-48d5-8b0c-f0b0736f93c3" class="equation"><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css')</style><div class="equation-container"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>H</mi><mi>p</mi><mo>=</mo><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>a</mi></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>b</mi></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>c</mi></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>d</mi></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>e</mi></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>f</mi></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>g</mi></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>h</mi></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>x</mi></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>y</mi></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><mo>=</mo><mrow><mo fence="true">[</mo><mtable rowspacing="0.16em" columnalign="center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mi>w</mi><msup><mi>x</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mi>w</mi><msup><mi>y</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mi>w</mi></mstyle></mtd></mtr></mtable><mo fence="true">]</mo></mrow><mo>=</mo><msup><mi>p</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup></mrow><annotation encoding="application/x-tex">Hp = \begin{bmatrix}
+a &amp; b &amp; c \\
+d &amp; e &amp; f \\
+g &amp; h &amp; 1 \\
+\end{bmatrix}\begin{bmatrix}
+x \\
+y \\
+1 \\
+\end{bmatrix} = \begin{bmatrix}
+wx&#x27; \\
+wy&#x27; \\
+w \\
+\end{bmatrix} = p&#x27;</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8778em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.08125em;">H</span><span class="mord mathnormal">p</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:3.6em;vertical-align:-1.55em;"></span><span class="minner"><span class="mopen"><span class="delimsizing mult"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.05em;"><span style="top:-4.05em;"><span class="pstrut" style="height:5.6em;"></span><span style="width:0.667em;height:3.600em;"><svg xmlns="http://www.w3.org/2000/svg" width='0.667em' height='3.600em' viewBox='0 0 667 3600'><path d='M403 1759 V84 H666 V0 H319 V1759 v0 v1759 h347 v-84
+H403z M403 1759 V0 H319 V1759 v0 v1759 h84z'/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.55em;"><span></span></span></span></span></span></span><span class="mord"><span class="mtable"><span class="col-align-c"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.05em;"><span style="top:-4.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">a</span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">d</span></span></span><span style="top:-1.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">g</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.55em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-c"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.05em;"><span style="top:-4.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">b</span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">e</span></span></span><span style="top:-1.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">h</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.55em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-c"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.05em;"><span style="top:-4.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">c</span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.10764em;">f</span></span></span><span style="top:-1.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.55em;"><span></span></span></span></span></span></span></span><span class="mclose"><span class="delimsizing mult"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.05em;"><span style="top:-4.05em;"><span class="pstrut" style="height:5.6em;"></span><span style="width:0.667em;height:3.600em;"><svg xmlns="http://www.w3.org/2000/svg" width='0.667em' height='3.600em' viewBox='0 0 667 3600'><path d='M347 1759 V0 H0 V84 H263 V1759 v0 v1759 H0 v84 H347z
+M347 1759 V0 H263 V1759 v0 v1759 h84z'/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.55em;"><span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner"><span class="mopen"><span class="delimsizing mult"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.05em;"><span style="top:-4.05em;"><span class="pstrut" style="height:5.6em;"></span><span style="width:0.667em;height:3.600em;"><svg xmlns="http://www.w3.org/2000/svg" width='0.667em' height='3.600em' viewBox='0 0 667 3600'><path d='M403 1759 V84 H666 V0 H319 V1759 v0 v1759 h347 v-84
+H403z M403 1759 V0 H319 V1759 v0 v1759 h84z'/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.55em;"><span></span></span></span></span></span></span><span class="mord"><span class="mtable"><span class="col-align-c"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.05em;"><span style="top:-4.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">x</span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">y</span></span></span><span style="top:-1.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.55em;"><span></span></span></span></span></span></span></span><span class="mclose"><span class="delimsizing mult"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.05em;"><span style="top:-4.05em;"><span class="pstrut" style="height:5.6em;"></span><span style="width:0.667em;height:3.600em;"><svg xmlns="http://www.w3.org/2000/svg" width='0.667em' height='3.600em' viewBox='0 0 667 3600'><path d='M347 1759 V0 H0 V84 H263 V1759 v0 v1759 H0 v84 H347z
+M347 1759 V0 H263 V1759 v0 v1759 h84z'/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.55em;"><span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:3.6em;vertical-align:-1.55em;"></span><span class="minner"><span class="mopen"><span class="delimsizing mult"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.05em;"><span style="top:-4.05em;"><span class="pstrut" style="height:5.6em;"></span><span style="width:0.667em;height:3.600em;"><svg xmlns="http://www.w3.org/2000/svg" width='0.667em' height='3.600em' viewBox='0 0 667 3600'><path d='M403 1759 V84 H666 V0 H319 V1759 v0 v1759 h347 v-84
+H403z M403 1759 V0 H319 V1759 v0 v1759 h84z'/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.55em;"><span></span></span></span></span></span></span><span class="mord"><span class="mtable"><span class="col-align-c"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.05em;"><span style="top:-4.21em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02691em;">w</span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7519em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span></span></span><span style="top:-3.01em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02691em;">w</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7519em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span></span></span><span style="top:-1.81em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02691em;">w</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.55em;"><span></span></span></span></span></span></span></span><span class="mclose"><span class="delimsizing mult"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:2.05em;"><span style="top:-4.05em;"><span class="pstrut" style="height:5.6em;"></span><span style="width:0.667em;height:3.600em;"><svg xmlns="http://www.w3.org/2000/svg" width='0.667em' height='3.600em' viewBox='0 0 667 3600'><path d='M347 1759 V0 H0 V84 H263 V1759 v0 v1759 H0 v84 H347z
+M347 1759 V0 H263 V1759 v0 v1759 h84z'/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.55em;"><span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.9963em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal">p</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8019em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span></span></span></span></span></div></figure><p id="152969ad-6a62-435c-afd7-628231fe811e" class="">for some weight <em>w</em> on each one of these points. We’re able to solve this system using just 4 distinct points, but this can make our results prone to a lot of noise. To help with this, we use more points to create an overdetermined system and solve it using least-squares.</p><figure id="195196ab-ebbd-4f9c-91b8-bdb1ec9c35c6" class="image"><a href="takenPhotosWithCorr.png"><img style="width:640px" src="takenPhotosWithCorr.png"/></a><figcaption>Images with their correspondences</figcaption></figure><hr id="9861d4fe-4a5b-44ba-919f-4af3adc9cd98"/><h2 id="d4867b91-a08e-4291-ba07-61271415c2a9" class="">Warp the Images</h2><p id="2ab41414-e68d-49de-b4b1-acf15b917643" class="">Once we have the homography matrix <em>H</em>, we can begin to warp an image. We do this by first taking the corners of our original image and mapping all of them all using <em>H</em>. Since this mapping is a homography, we know that for an image corners <em>a</em>, <em>b</em>, <em>c</em>, and <em>d</em>, all pixels of the mapped image will be contained within the polygon described by the corners <em>Ha</em>, <em>Hb</em>, <em>Hc</em>, and <em>Hd</em>. Therefore, upon finding the new corners, we can simply apply <em>H^{-1}</em> on each of the points within the new polygon to map back to the original image and then populate the new image with their corresponding values.</p><figure id="9d5cc48a-2389-4b6e-8fb6-c4300898adb7" class="image"><a href="set1WithWarped.png"><img style="width:552px" src="set1WithWarped.png"/></a><figcaption>Sample image mapped to new correspondences</figcaption></figure><hr id="9528baf8-ecba-492b-87af-0b8d943b8010"/><h2 id="6c68bdb8-ed40-43fc-9c96-d7cf6efde924" class="">Image Rectification</h2><p id="10ad5153-78c4-425e-90a3-c17c6194336c" class="">With the ability to warp images, we’re also able to rectify images by mapping images to new hand-picked points.</p><div id="94aea878-051f-41c3-a9ce-9f81776a8a59" class="column-list"><div id="5192cac3-d5f0-4d56-b2b6-3c6b85b04ff2" style="width:50%" class="column"><figure id="d8bd3d29-b742-4d68-9d04-cd3c5efea2d7" class="image"><a href="phone.jpg"><img style="width:708px" src="phone.jpg"/></a><figcaption>Original photo of a phone</figcaption></figure></div><div id="fd1e798f-cc2d-4bf2-bea0-e6f223b1dcaf" style="width:50%" class="column"><figure id="f4313c08-f4e7-4e75-8b4f-8d7ce57f379f" class="image"><a href="phoneRectified.png"><img style="width:708px" src="phoneRectified.png"/></a><figcaption>Rectified photo of a phone</figcaption></figure></div></div><div id="77bae3f5-e7d7-496b-b1a1-a784898102bf" class="column-list"><div id="61829d11-04e0-4816-b117-23a846608538" style="width:50%" class="column"><figure id="f4801788-c015-44aa-8728-ac59c95c4545" class="image"><a href="newYorker.jpg"><img style="width:708px" src="newYorker.jpg"/></a><figcaption>Original photo of a poster</figcaption></figure></div><div id="01879700-d278-4eeb-bb0f-3fac858a508c" style="width:50%" class="column"><figure id="51199e69-88d0-4079-b04b-a16f35facf8b" class="image"><a href="newYorkerRectified.png"><img style="width:708px" src="newYorkerRectified.png"/></a><figcaption>Rectified photo of a poster</figcaption></figure></div></div><hr id="ee7c8873-99bd-49eb-827a-a3194de42ff8"/><h2 id="f69c35ba-a572-4001-8a43-73bbff9dd398" class="">Blend the Images into a Mosaic</h2><p id="7f5da075-91b7-46a1-8930-3ba224be3406" class="">To generate a mosaic, we first take two images of a scene and their correspondences. We then take the average of their correspondences and warp both images to the averages correspondences. Next, we sum up these two images. Below are the results of this.</p><div id="f55067c8-f3aa-4ac2-b79e-3514960f85f6" class="column-list"><div id="ae33dd20-e0cc-4f3b-b92f-8d2fea2e132b" style="width:33.333333333333336%" class="column"><figure id="8bf779bf-6659-43c5-9f9b-242980d9848c" class="image"><a href="set1Mosaic_added.png"><img style="width:331px" src="set1Mosaic_added.png"/></a></figure></div><div id="8635ddf5-c861-494f-b748-69825b2157d5" style="width:33.333333333333336%" class="column"><figure id="fe3e2ade-770f-46c4-b1aa-eb8c977cfa95" class="image"><a href="set2Mosaic_added.png"><img style="width:330.984375px" src="set2Mosaic_added.png"/></a></figure></div><div id="652c1de9-8d01-44ac-bbfc-08026cec171a" style="width:33.33333333333333%" class="column"><figure id="fd2fa7db-a554-4004-8d1b-5b0099ecbf47" class="image"><a href="set3Mosaic_added.png"><img style="width:205.3125px" src="set3Mosaic_added.png"/></a></figure></div></div><p id="8e380608-682c-4adb-9536-1abcce932325" class="">The overlap is clearly more highlighted due to the inherent nature of us simply summing up our two images. To account for this, we generate a mask for the overlap. Then, we apply the mask over our mosaic to retrieve elements within the overlapped region. We normalize this region only and then place it back into the mosaic. Finally, we renormalize the entire image again. This provides us with a weighted normalization of our image, and we produce the following results.</p><div id="0af7509c-539d-4ac5-80f3-0c4128fd1ad2" class="column-list"><div id="56def415-dc16-4c4c-ac97-d276a0835b4c" style="width:33.333333333333336%" class="column"><figure id="d7e0ddca-1d05-43c9-a21a-db349e2775b9" class="image"><a href="set1Mosaic.png"><img style="width:330.984375px" src="set1Mosaic.png"/></a></figure></div><div id="c8a5b6bc-6e4e-4d19-9f41-76dcb2d86cf1" style="width:33.333333333333336%" class="column"><figure id="f3c2d827-f1fd-4d1c-bae9-c04932d9682e" class="image"><a href="set2Mosaic.png"><img style="width:330.984375px" src="set2Mosaic.png"/></a></figure></div><div id="6f112c09-ac82-4ea7-ab91-f4575c3734a2" style="width:33.33333333333333%" class="column"><figure id="86e257fd-7e38-4804-be92-c84307b36016" class="image"><a href="set3Mosaic.png"><img style="width:538px" src="set3Mosaic.png"/></a></figure></div></div><hr id="300d558c-6996-4d8d-81b9-12e777d80b7c"/><h2 id="c7d79467-260e-473a-a810-1373a064a4f1" class="">Conclusion</h2><p id="c6019ba4-3694-40fc-becf-8795b2ad0c82" class="">In this part of project 4, we were able warp images and create mosaics using a homography matrix. The math and logic behind this process seems to be close in relation to what was done for the CS180 project 3, where we conducted face morphings.</p><hr id="12f412c2-dbbd-800a-bb00-c0cfe9599bfa"/><h1 id="12f412c2-dbbd-803e-8a5a-ea4edfad0d2f" class="">Part B: Feature Matching for Autostitching</h1><hr id="12f412c2-dbbd-806a-a33c-d8a682cb08f3"/><h2 id="12f412c2-dbbd-8054-8109-cad8aee58ed3" class="">Overview</h2><p id="12f412c2-dbbd-808b-9621-c6c15d9e5619" class="">In this part of the project, we create an auto-detection of points to use for the stitching together of images. These points are found using optimal Harris corners that are correctly mapped to as inliers.</p><hr id="12f412c2-dbbd-8014-ad6e-dfa82b50d5df"/><h2 id="130412c2-dbbd-8000-a5f2-c5f9016e5adb" class="">Adaptive Non-Maximal Suppression (ANMS)</h2><p id="130412c2-dbbd-80f9-bff2-ebfc7474b9a6" class="">In this part, we first identify the Harris corners of the image. Then, for each corner, we find the closest other corner that is a decent amount “larger” than this current corner; we store the distance between them as the radius. Finally, we select the points with the largest radius.</p><figure id="130412c2-dbbd-8088-ba44-c5b4be8a2f1e" class="image"><a href="im1_ANMS_corners.png"><img style="width:640px" src="im1_ANMS_corners.png"/></a></figure><hr id="130412c2-dbbd-8060-9c88-e78ca34041d3"/><h2 id="130412c2-dbbd-801a-a3ac-f95f0fad0dd8" class="">Feature Descriptor Extraction</h2><p id="130412c2-dbbd-803a-982c-f776d7e5ecf8" class="">For each of the corners we obtained through ANMS, we select the 40x40 region around it. We then resize this region into an 8x8 region. For each region’s color channels, we normalize the color channel by subtracting each channel by its mean and dividing by its standard deviation. Then we flatten the image with all its channels into a 1x192 array, and we stack all of these feature arrays together. Below are some examples of the 8x8 regions.</p><div id="130412c2-dbbd-80a9-9309-f2f1e41a5b1c" class="column-list"><div id="130412c2-dbbd-80f0-8686-d5b141b54f16" style="width:50%" class="column"><figure id="130412c2-dbbd-80fb-ae79-d9c129b8e24d" class="image"><a href="im1_1region1.png"><img style="width:330.9875183105469px" src="im1_1region1.png"/></a></figure></div><div id="130412c2-dbbd-8026-af40-e035b7325623" style="width:50%" class="column"><figure id="130412c2-dbbd-80de-b01f-eecf55d29d41" class="image"><a href="im1_2region1.png"><img style="width:330.9875183105469px" src="im1_2region1.png"/></a></figure></div></div><div id="130412c2-dbbd-8072-9e81-f649167c3b4e" class="column-list"><div id="130412c2-dbbd-80fb-89c3-ecdc22e360a8" style="width:50%" class="column"><figure id="130412c2-dbbd-8079-97b3-c5d9f51d9e74" class="image"><a href="im1_1region2.png"><img style="width:330.9875183105469px" src="im1_1region2.png"/></a></figure></div><div id="130412c2-dbbd-803c-9314-c16278d72cc2" style="width:50%" class="column"><figure id="130412c2-dbbd-8046-88dd-ecdb18cf4d77" class="image"><a href="im1_2region2.png"><img style="width:330.9875183105469px" src="im1_2region2.png"/></a></figure></div></div><div id="130412c2-dbbd-80e4-8f4a-fe88df0e90fd" class="column-list"><div id="130412c2-dbbd-8034-b623-e6256abd5054" style="width:50%" class="column"><figure id="130412c2-dbbd-8054-999d-ea942e2e71cb" class="image"><a href="im1_1region3.png"><img style="width:330.9875183105469px" src="im1_1region3.png"/></a></figure></div><div id="130412c2-dbbd-8027-96da-f358c35a45e0" style="width:50%" class="column"><figure id="130412c2-dbbd-802f-9c63-f84d79d12d3b" class="image"><a href="im1_2region3.png"><img style="width:330.9875183105469px" src="im1_2region3.png"/></a></figure></div></div><hr id="130412c2-dbbd-8075-a39b-f890dd842e45"/><h2 id="130412c2-dbbd-8021-a70a-c1f26c28f09f" class="">Feature Matching</h2><p id="130412c2-dbbd-8034-95a2-f06a33b5a49c" class="">Now that we have features from each of the images that we’re stitching together, we wish to match the corresponding features to each other. This is done by calculating the pairwise sum of the square of the differences, finding the Lowe’s ratio through the nearest neighbor distances, and then finding finding all values below our Lowe’s threshold. We then acquire the indexes of points from each image that correspond to each other.</p><hr id="130412c2-dbbd-806e-be33-eba0d8e73f51"/><h2 id="130412c2-dbbd-80f5-8326-d6b6d07ddcb2" class="">Random Sample Consensus (RANSAC)</h2><p id="130412c2-dbbd-804f-899a-e681f39e9734" class="">In RANSAC, we run through a predetermined number of iterations. For each iteration, we sample 4 random pairs from the corresponding points that we find during feature matching. Using these 4 points, we generate a homography matrix <em>H</em> and then apply this <em>H</em> onto all of the source points (points that are being mapped to the target points). For each of these newly mapped points, we find out how many of the points are “close” to where they should actually be according to the feature matching (here, we required the points to be at most 3 pixels away from where they should be). For each homography matrix, the one that generates the greatest number of points that satisfy our conditions is used for our final mosaic, which we generate in the same way that we did for the first part of this project.</p><figure id="130412c2-dbbd-80b1-bca6-c4e4390a2bf9" class="image"><a href="im1_feature_matches.png"><img style="width:640px" src="im1_feature_matches.png"/></a></figure><hr id="130412c2-dbbd-8078-8b93-f64d581e9864"/><h2 id="130412c2-dbbd-804e-85df-faadc8854bee" class="">Automatically Stitched Mosaics</h2><p id="130412c2-dbbd-809f-8fa4-f351108e0f4d" class="">Below are our final results, with the manually stitches mosaics on the left and the automatically stitched mosaics on the right.</p><div id="130412c2-dbbd-80f3-bc0d-f8a9e228c678" class="column-list"><div id="130412c2-dbbd-8044-9e18-f7c6cce60d0a" style="width:50%" class="column"><figure id="130412c2-dbbd-8010-a405-ca913409a9e5" class="image"><a href="set1Mosaic%201.png"><img style="width:330.9875183105469px" src="set1Mosaic%201.png"/></a><figcaption>Manual</figcaption></figure></div><div id="130412c2-dbbd-80d8-9cca-fccff60b2545" style="width:50%" class="column"><figure id="130412c2-dbbd-8086-acb1-f45384f86f63" class="image"><a href="im1RANSACMosaic.png"><img style="width:330.9875183105469px" src="im1RANSACMosaic.png"/></a><figcaption>Automatic</figcaption></figure></div></div><div id="130412c2-dbbd-80ff-adaa-cb355818eae5" class="column-list"><div id="130412c2-dbbd-8003-ba57-f099cd4ecc85" style="width:50%" class="column"><figure id="130412c2-dbbd-8071-be11-de7069061955" class="image"><a href="set2Mosaic%201.png"><img style="width:330.9875183105469px" src="set2Mosaic%201.png"/></a><figcaption>Manual</figcaption></figure></div><div id="130412c2-dbbd-80fc-b1a1-fcb7f577e529" style="width:50%" class="column"><figure id="130412c2-dbbd-8025-8e4d-f61514c87036" class="image"><a href="im2RANSACMosaic.png"><img style="width:538px" src="im2RANSACMosaic.png"/></a><figcaption>Automatic</figcaption></figure></div></div><div id="130412c2-dbbd-80b3-9ea8-d131f25ca94d" class="column-list"><div id="130412c2-dbbd-8059-9104-f87b039d2265" style="width:50%" class="column"><figure id="130412c2-dbbd-8067-9d6e-d62c46776826" class="image"><a href="set3Mosaic%201.png"><img style="width:330.9875183105469px" src="set3Mosaic%201.png"/></a><figcaption>Manual</figcaption></figure></div><div id="130412c2-dbbd-8010-a233-c437f81382d4" style="width:50%" class="column"><figure id="130412c2-dbbd-803b-a607-d0a17179c414" class="image"><a href="im3RANSACMosaic.png"><img style="width:330.9875183105469px" src="im3RANSACMosaic.png"/></a><figcaption>Automatic</figcaption></figure></div></div></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>
